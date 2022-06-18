@@ -1,0 +1,29 @@
+cloud:
+  aws:
+    region:
+      static: eu-central-1
+    stack:
+      auto: false
+
+aws:
+  access-key: ***********
+  secret-key: **********
+application:
+  bucket:
+    name: de-bijenkorf
+
+spring:
+  servlet:
+    multipart:
+      enabled: true
+      file-size-threshold: 10MB
+      max-file-size: 15MB
+      max-request-size: 20MB
+
+###configuration file to prevent noise in the application logs related to Amazon s3, hide com.amazonaws.util.EC2MetadataUtils warning logs on startup.
+logging:
+  level:
+    com:
+      amazonaws:
+        util:
+          EC2MetadataUtils: error
