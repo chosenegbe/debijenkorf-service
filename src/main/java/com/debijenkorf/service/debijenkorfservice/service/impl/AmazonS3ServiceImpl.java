@@ -5,7 +5,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
 
 import com.debijenkorf.service.debijenkorfservice.dtos.ImageDetailsResponse;
-import com.debijenkorf.service.debijenkorfservice.service.UploadService;
+import com.debijenkorf.service.debijenkorfservice.service.AmazonS3Service;
 
 import com.debijenkorf.service.debijenkorfservice.utils.S3Utility;
 import com.debijenkorf.service.debijenkorfservice.utils.ResizeImage;
@@ -29,7 +29,7 @@ import java.util.List;
 
 @Service
 
-public class AmazonS3ServiceImpl implements UploadService {
+public class AmazonS3ServiceImpl implements AmazonS3Service {
     private static String THUMB_NAIL = "thumbnail";
     private static String ORIGINAL = "original";
     private static String TMP_FOLDER = "tmp";

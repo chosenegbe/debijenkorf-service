@@ -3,7 +3,7 @@ package com.debijenkorf.service.debijenkorfservice.controller;
 import com.amazonaws.AmazonServiceException;
 import com.debijenkorf.service.debijenkorfservice.exception.CustomException;
 import com.debijenkorf.service.debijenkorfservice.dtos.PredefineTypeName;
-import com.debijenkorf.service.debijenkorfservice.service.UploadService;
+import com.debijenkorf.service.debijenkorfservice.service.AmazonS3Service;
 import com.debijenkorf.service.debijenkorfservice.utils.S3Utility;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 public class AmazonS3Controller {
 
     @Autowired
-    private UploadService uploadService;
+    private AmazonS3Service uploadService;
 
     @Autowired
     private S3Utility imageUtility;
