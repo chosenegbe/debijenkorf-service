@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
@@ -37,7 +38,7 @@ public class AmazonS3Controller {
     private AmazonS3Service uploadService;
 
     @Autowired
-    private S3Utility imageUtility;
+    private S3Utility s3Utility;
 
     @GetMapping(value= {"/show/{predefined-type-name}/{dummy-seo-name}","/show/{predefined-type-name}"})
     public ResponseEntity <?> s3BucketImage(@PathVariable("predefined-type-name") PredefineTypeName predefinedTypeName,
@@ -65,15 +66,18 @@ public class AmazonS3Controller {
                     .body(resource);
 
         } catch(AmazonServiceException e) {
-            throw new CustomException(404, e.getMessage());
+            throw new CustomException("The Specified key does not exist in the S3 bucket!");
         }
         catch (FileNotFoundException e) {
-            throw new CustomException(404, e.getMessage());
+            throw new CustomException("The Specified key does not exist in the S3 bucket!");
+        }
+        catch(MethodArgumentTypeMismatchException | IllegalArgumentException e) {
+            throw new CustomException("The Specified key does not exist in the S3 bucket! ----11");
         }
         catch (MalformedURLException e) {
-            throw new CustomException(404, e.getMessage());
+            throw new CustomException("Something went wrong!");
         } catch (Exception e) {
-            throw new CustomException(404, e.getMessage());
+            throw new CustomException("Something went wrong");
         }
 
 
@@ -85,14 +89,21 @@ public class AmazonS3Controller {
             uploadService.deleteS3BucketImage(predefinedTypeName.toString(), reference);
             ResponseEntity.ok();
         } catch (AmazonServiceException e) {
-            throw new CustomException(404, e.getMessage());
+            throw new CustomException("The Specified key does not exist in the S3 bucket!");
+        }
+        catch (Exception e) {
+            throw new CustomException("Could not delete the specified file");
         }
     }
 
     @PostMapping("/uploads/{predefined-type-name}")
     public ResponseEntity<String> uploadFile(@PathVariable("predefined-type-name") PredefineTypeName predefinedTypeName,
                                              @RequestParam("file") MultipartFile file) {
-        return new ResponseEntity<>(uploadService.uploadFileTos3bucket(predefinedTypeName.toString(), imageUtility.convertMultipartFileToFile(file)), HttpStatus.CREATED);
+        try {
+            return new ResponseEntity<>(uploadService.uploadFileTos3bucket(predefinedTypeName.toString(), s3Utility.convertMultipartFileToFile(file)), HttpStatus.CREATED);
+        } catch(Exception e) {
+            throw new CustomException("Something went wrong, could not upload file(s) to the server! Try again later");
+        }
     }
 
     @PostMapping("/uploads/{predefined-type-name}/multiple")
