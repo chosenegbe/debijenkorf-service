@@ -84,7 +84,7 @@ public class AmazonS3ServiceImpl implements AmazonS3Service {
         LOG.info("START: Uploading file " + file.getName() + " to s3 bucket. Bucket name - " + bucketName + ", keyName" + keyName);
         try {
             s3Client.putObject(new PutObjectRequest(bucketName, keyName, file));
-            LOG.info("END: File" + file.getName() + " uploaded to s3 bucket. Bucket name - " + bucketName + ", keyName" + keyName);
+            LOG.info("END: File " + file.getName() + " uploaded to s3 bucket. Bucket name - " + bucketName + ", keyName" + keyName);
         } catch (AmazonServiceException e) {
             LOG.error(e.getErrorMessage());
         }

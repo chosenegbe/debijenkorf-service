@@ -16,6 +16,7 @@ import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Random;
 
 import static java.lang.String.valueOf;
 
@@ -25,10 +26,19 @@ public class ResizeImage {
     private enum Type {
         png, jpg
     };
-    private static int WIDTH = 300;
-    private static int HEIGHT = 300;
 
-    /* Scale type not switch and fill validity not yet implemented */
+    private enum ScaleType {
+        Crop,
+        Fill,
+        Skew;
+        private static ResizeImage.ScaleType getRandomScaleType() { //just for simulation
+            Random random = new Random();
+            return values()[random.nextInt(values().length)];
+        }
+    };
+
+    private static int WIDTH = 200;
+    private static int HEIGHT = 200;
 
     public File resizedImage(File originalFile) {
         String tempDir = System.getProperty("java.io.tmpdir");
@@ -40,32 +50,38 @@ public class ResizeImage {
 
             if (!imageNeedsResizing(originalFile, readImage)) return originalFile;
 
-            BufferedImage resized = new BufferedImage(WIDTH, HEIGHT, readImage.getType());
+            ScaleType scaleType = ScaleType.getRandomScaleType();
+            boolean isFilled = scaleType == scaleType.Skew;
+            File resizedFile = getResizedImage(originalFile, pathSeparator, filePath, readImage);
 
-            Graphics2D g2 = resized.createGraphics();
-            g2.drawImage(readImage, 0, 0, WIDTH, HEIGHT, null);
-            g2.dispose();
-
-            File resizedFile = new File(filePath + pathSeparator + originalFile.getName());
-            ImageIO.write(resized, imageFormat(originalFile.getName()), resizedFile);
+            LOG.info("Image " + originalFile.getName() + " resized. New dimension is " + WIDTH + " * " + HEIGHT + ". Scale type set to " + scaleType + (isFilled? ". The filled property was set": ""));
             return resizedFile;
 
         } catch (IOException ex) {
             LOG.error("Error occurred in image resizing");
             throw new CustomException("Error occurred in image resizing");
         }
+    }
 
+    private File getResizedImage(File originalFile, String pathSeparator, Path filePath, BufferedImage readImage) throws IOException {
+        BufferedImage resized = new BufferedImage(WIDTH, HEIGHT, readImage.getType());
+        Graphics2D g2 = resized.createGraphics();
+        g2.drawImage(readImage, 0, 0, WIDTH, HEIGHT, null);
+        g2.dispose();
+        File resizedFile = new File(filePath + pathSeparator + originalFile.getName());
+        ImageIO.write(resized, newImageFormat(originalFile.getName()), resizedFile);
+        return resizedFile;
     }
 
     private boolean imageNeedsResizing(File originalFile, BufferedImage image) {
         if (image.getHeight() <= HEIGHT || image.getWidth() <= WIDTH) {
-            LOG.info("No resizing needed for " + originalFile.getName() + ". The image size is already smaller than the specified resize parameters of " + WIDTH + " * " + HEIGHT);
+            LOG.info("No resizing needed for " + originalFile.getName() + ". The image dimension is already smaller than the specified resize dimension of " + WIDTH + " * " + HEIGHT);
             return false;
         }
         return true;
     }
-    private String imageFormat(String format) {
-        if (format.endsWith("png"))
+    private String newImageFormat(String format) {
+        if (format.endsWith(".png"))
             return valueOf(Type.png);
         else
             return valueOf(Type.jpg);
