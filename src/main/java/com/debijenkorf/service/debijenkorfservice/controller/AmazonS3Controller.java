@@ -1,11 +1,13 @@
 package com.debijenkorf.service.debijenkorfservice.controller;
 
 import com.amazonaws.AmazonServiceException;
+import com.debijenkorf.service.debijenkorfservice.DebijenkorfServiceApplication;
 import com.debijenkorf.service.debijenkorfservice.exception.CustomException;
 import com.debijenkorf.service.debijenkorfservice.dtos.PredefineTypeName;
 import com.debijenkorf.service.debijenkorfservice.service.AmazonS3Service;
 import com.debijenkorf.service.debijenkorfservice.utils.S3Utility;
-import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.core.io.Resource;
@@ -20,8 +22,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.net.MalformedURLException;
+import java.io.IOException;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -31,11 +32,11 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/image")
-@Slf4j
 public class AmazonS3Controller {
+    private static final Logger LOG = LoggerFactory.getLogger(DebijenkorfServiceApplication.class);
 
     @Autowired
-    private AmazonS3Service uploadService;
+    private AmazonS3Service s3Service;
 
     @Autowired
     private S3Utility s3Utility;
@@ -43,56 +44,53 @@ public class AmazonS3Controller {
     @GetMapping(value= {"/show/{predefined-type-name}/{dummy-seo-name}","/show/{predefined-type-name}"})
     public ResponseEntity <?> s3BucketImage(@PathVariable("predefined-type-name") PredefineTypeName predefinedTypeName,
                                             @PathVariable(name = "dummy-seo-name", required = false) String dummySeoName,
-                                            @RequestParam(name = "reference") String fileName,
+                                            @RequestParam(name = "reference") String reference,
                                             HttpServletRequest request) {
 
         try {
 
            if(dummySeoName != null)  {
-               return new ResponseEntity < > (uploadService.s3BucketImageDetails(predefinedTypeName.toString(), fileName), HttpStatus.OK);
+               return new ResponseEntity < > (s3Service.s3BucketImageDetails(predefinedTypeName.toString(), reference), HttpStatus.OK);
            }
-           File file = uploadService.downloadFileFromS3bucket(fileName);
-           System.out.println(file.getName());
-           System.out.println(file.getAbsoluteFile());
+           LOG.info("START - Retrieving " + reference + " from Amazon S3 server");
+           File file = s3Service.downloadFileFromS3bucket(reference);
+
            Path path = FileSystems.getDefault().getPath(file.getAbsolutePath()).normalize();
 
            Resource resource = new UrlResource(path.toUri());
            String contentType = request.getServletContext().getMimeType(resource.getFile().getAbsolutePath());
-
-            return ResponseEntity
+           LOG.info("END " + reference + " retrieved from Amazon S3 server..");
+           return ResponseEntity
                     .ok()
                     .contentType(MediaType.parseMediaType(contentType))
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename())
                     .body(resource);
 
         } catch(AmazonServiceException e) {
-            throw new CustomException("The Specified key does not exist in the S3 bucket!");
-        }
-        catch (FileNotFoundException e) {
-            throw new CustomException("The Specified key does not exist in the S3 bucket!");
-        }
-        catch(MethodArgumentTypeMismatchException | IllegalArgumentException e) {
-            throw new CustomException("The Specified key does not exist in the S3 bucket! ----11");
-        }
-        catch (MalformedURLException e) {
-            throw new CustomException("Something went wrong!");
+            LOG.info("The Specified key " + reference + " does not exist in the S3 bucket!");
+            throw new CustomException("The Specified key " + reference + " does not exist in the S3 bucket!");
+        } catch(MethodArgumentTypeMismatchException e) {
+            LOG.info("The predefined type" + predefinedTypeName + " is incorrect! Allow values are  [thumbnails or original]");
+            throw new CustomException("The predefined type" + predefinedTypeName + " is incorrect! Allow values are  [thumbnails or original]");
+        } catch(IOException e){
+            LOG.warn("Something went wrong, retry will be attempted");
+            throw new CustomException("Something went wrong, retry will be attempted\"");
         } catch (Exception e) {
-            throw new CustomException("Something went wrong");
+            throw new CustomException("OOOPS");
         }
-
-
    }
     @DeleteMapping("/flush/{predefined-type-name}")
     public void deleteImageInS3Bucket(@PathVariable("predefined-type-name") PredefineTypeName predefinedTypeName,
                                                  @RequestParam(name = "reference") String reference) {
         try {
-            uploadService.deleteS3BucketImage(predefinedTypeName.toString(), reference);
+            s3Service.deleteS3BucketImage(predefinedTypeName.toString(), reference);
             ResponseEntity.ok();
         } catch (AmazonServiceException e) {
+            LOG.info("The Specified key " + reference + " does not exist in the S3 bucket!");
             throw new CustomException("The Specified key does not exist in the S3 bucket!");
         }
         catch (Exception e) {
-            throw new CustomException("Could not delete the specified file");
+            throw new CustomException("OOOPS, something went wrong, could not delete the specified file");
         }
     }
 
@@ -100,7 +98,7 @@ public class AmazonS3Controller {
     public ResponseEntity<String> uploadFile(@PathVariable("predefined-type-name") PredefineTypeName predefinedTypeName,
                                              @RequestParam("file") MultipartFile file) {
         try {
-            return new ResponseEntity<>(uploadService.uploadFileTos3bucket(predefinedTypeName.toString(), s3Utility.convertMultipartFileToFile(file)), HttpStatus.CREATED);
+            return new ResponseEntity<>(s3Service.uploadFileTos3bucket(predefinedTypeName.toString(), s3Utility.convertMultipartFileToFile(file)), HttpStatus.CREATED);
         } catch(Exception e) {
             throw new CustomException("Something went wrong, could not upload file(s) to the server! Try again later");
         }
