@@ -4,7 +4,7 @@ import com.amazonaws.AmazonServiceException;
 import com.debijenkorf.service.debijenkorfservice.DebijenkorfServiceApplication;
 import com.debijenkorf.service.debijenkorfservice.exception.CustomException;
 import com.debijenkorf.service.debijenkorfservice.dtos.PredefineTypeName;
-import com.debijenkorf.service.debijenkorfservice.service.AmazonS3Service;
+import com.debijenkorf.service.debijenkorfservice.services.s3.AmazonS3Service;
 import com.debijenkorf.service.debijenkorfservice.utils.S3Utility;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/image")
 public class AmazonS3Controller {
-    private static final Logger LOG = LoggerFactory.getLogger(DebijenkorfServiceApplication.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AmazonS3Controller.class);
 
     @Autowired
     private AmazonS3Service s3Service;

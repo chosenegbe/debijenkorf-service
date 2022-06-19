@@ -1,0 +1,39 @@
+cloud:
+  aws:
+    region:
+      static: eu-central-1
+    stack:
+      auto: false
+
+aws:
+  access-key: xxxxxxxxxxxxxxxxxxxxxxx
+  secret-key: xxxxxxxxxxxxxxxxxxxxxxx
+application:
+  bucket:
+    name: de-bijenkorf
+
+spring:
+  servlet:
+    multipart:
+      enabled: true
+      file-size-threshold: 10MB
+      max-file-size: 15MB
+      max-request-size: 20MB
+  jasypt:
+    encryptor:
+      password: salting
+
+external:
+  server:
+    url: https://i.imgur.com  #Files not found in s3 bucket will  be downloaded with this url
+
+###configuration file to prevent noise in the application logs related to Amazon s3, hide com.amazonaws.util.EC2MetadataUtils warning logs on startup.
+logging:
+  level:
+    debijenkorf:
+      service:
+        debijenkorfservice: trace
+    com:
+      amazonaws:
+        util:
+          EC2MetadataUtils: error

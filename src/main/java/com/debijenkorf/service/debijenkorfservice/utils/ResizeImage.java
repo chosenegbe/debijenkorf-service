@@ -1,6 +1,10 @@
 package com.debijenkorf.service.debijenkorfservice.utils;
 
 
+import com.debijenkorf.service.debijenkorfservice.exception.CustomException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
@@ -13,13 +17,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import static java.lang.String.valueOf;
+
 @Component
 public class ResizeImage {
+    private static final Logger LOG = LoggerFactory.getLogger(ResizeImage.class);
+    private enum Type {
+        png, jpg
+    };
+    private static int WIDTH = 300;
+    private static int HEIGHT = 300;
 
-    private static int WIDTH = 100;
-    private static int HEIGHT = 100;
-    private static String FORMAT_PNG = "png";
-    private static String FORMAT_JPG = "jpg";
+    /* Scale type not switch and fill validity not yet implemented */
 
     public File resizedImage(File originalFile) {
         String tempDir = System.getProperty("java.io.tmpdir");
@@ -27,21 +36,38 @@ public class ResizeImage {
         Path ticketTempDirPath = Paths.get(tempDir + pathSeparator + "thumbnail");
         try {
             Path filePath = Files.createDirectories(ticketTempDirPath);
-            BufferedImage originalImage = ImageIO.read(originalFile);
-            BufferedImage resized = new BufferedImage(WIDTH, HEIGHT, originalImage.getType());
+            BufferedImage readImage = ImageIO.read(originalFile);
+
+            if (!imageNeedsResizing(originalFile, readImage)) return originalFile;
+
+            BufferedImage resized = new BufferedImage(WIDTH, HEIGHT, readImage.getType());
 
             Graphics2D g2 = resized.createGraphics();
-            g2.drawImage(originalImage, 0, 0, WIDTH, HEIGHT, null);
+            g2.drawImage(readImage, 0, 0, WIDTH, HEIGHT, null);
             g2.dispose();
 
             File resizedFile = new File(filePath + pathSeparator + originalFile.getName());
-            ImageIO.write(resized, FORMAT_PNG, resizedFile);
+            ImageIO.write(resized, imageFormat(originalFile.getName()), resizedFile);
             return resizedFile;
 
         } catch (IOException ex) {
-            throw new RuntimeException();
+            LOG.error("Error occurred in image resizing");
+            throw new CustomException("Error occurred in image resizing");
         }
 
     }
 
+    private boolean imageNeedsResizing(File originalFile, BufferedImage image) {
+        if (image.getHeight() <= HEIGHT || image.getWidth() <= WIDTH) {
+            LOG.info("No resizing needed for " + originalFile.getName() + ". The image size is already smaller than the specified resize parameters of " + WIDTH + " * " + HEIGHT);
+            return false;
+        }
+        return true;
+    }
+    private String imageFormat(String format) {
+        if (format.endsWith("png"))
+            return valueOf(Type.png);
+        else
+            return valueOf(Type.jpg);
+    }
 }
