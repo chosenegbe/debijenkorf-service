@@ -1,0 +1,175 @@
+{
+	"info": {
+		"_postman_id": "693ec746-429d-4547-a0b2-905702862b65",
+		"name": "bijenkorf-postman",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Show Image",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{hostname}}/image/show/thumbnail?reference=Cdlayxb.jpg",
+					"host": [
+						"{{hostname}}"
+					],
+					"path": [
+						"image",
+						"show",
+						"thumbnail"
+					],
+					"query": [
+						{
+							"key": "reference",
+							"value": "Cdlayxb.jpg"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Image details",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{hostname}}/image/show/:predefined-type-name/dummy-seo?reference=8ksn9ZZ.jpg",
+					"host": [
+						"{{hostname}}"
+					],
+					"path": [
+						"image",
+						"show",
+						":predefined-type-name",
+						"dummy-seo"
+					],
+					"query": [
+						{
+							"key": "reference",
+							"value": "8ksn9ZZ.jpg"
+						}
+					],
+					"variable": [
+						{
+							"key": "predefined-type-name",
+							"value": "thumbnail",
+							"description": "thumbnail or description"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Remove Image",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{hostname}}/image/flush/original?reference=slack.jpg",
+					"host": [
+						"{{hostname}}"
+					],
+					"path": [
+						"image",
+						"flush",
+						"original"
+					],
+					"query": [
+						{
+							"key": "reference",
+							"value": "slack.jpg"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload File",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "file",
+							"type": "file",
+							"src": "/Users/megbe/Documents/nodejs/complete-node-bootcamp-master/4-natours/starter/dev-data/img/new-tour-4.jpg"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{hostname}}/image/uploads/original/",
+					"host": [
+						"{{hostname}}"
+					],
+					"path": [
+						"image",
+						"uploads",
+						"original",
+						""
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Upload Multiple Files",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"url": {
+					"raw": "{{hostname}}/image/uploads/:predefined-type-name/multiple",
+					"host": [
+						"{{hostname}}"
+					],
+					"path": [
+						"image",
+						"uploads",
+						":predefined-type-name",
+						"multiple"
+					],
+					"variable": [
+						{
+							"key": "predefined-type-name",
+							"value": "original",
+							"description": "original or thumbnail"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "hostname",
+			"value": "http://localhost:8080"
+		}
+	]
+}
