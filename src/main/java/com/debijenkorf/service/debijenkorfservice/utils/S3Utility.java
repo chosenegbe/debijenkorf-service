@@ -1,12 +1,6 @@
 package com.debijenkorf.service.debijenkorfservice.utils;
 
 import org.springframework.stereotype.Component;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.nio.file.FileSystems;
 
 @Component
@@ -41,16 +35,5 @@ public class S3Utility {
         }
         return path + fileName;
 
-    }
-
-    public File convertMultipartFileToFile(MultipartFile file) {
-
-        File convertedFile = new File(file.getOriginalFilename());
-        try(BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(convertedFile))) {
-            bos.write(file.getBytes());
-        }catch(IOException ex) {
-            ex.printStackTrace();
-        }
-        return convertedFile;
     }
 }

@@ -1,11 +1,11 @@
 package com.debijenkorf.service.debijenkorfservice.controller;
 
 import com.amazonaws.AmazonServiceException;
-import com.debijenkorf.service.debijenkorfservice.DebijenkorfServiceApplication;
 import com.debijenkorf.service.debijenkorfservice.exception.CustomException;
 import com.debijenkorf.service.debijenkorfservice.dtos.PredefineTypeName;
 import com.debijenkorf.service.debijenkorfservice.services.s3.AmazonS3Service;
-import com.debijenkorf.service.debijenkorfservice.utils.S3Utility;
+import com.debijenkorf.service.debijenkorfservice.utils.ImageUtility;
+import com.debijenkorf.service.debijenkorfservice.utils.ResizeImage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,14 +39,14 @@ public class AmazonS3Controller {
     private AmazonS3Service s3Service;
 
     @Autowired
-    private S3Utility s3Utility;
+    private ImageUtility imageUtility;
 
     @GetMapping(value= {"/show/{predefined-type-name}/{dummy-seo-name}","/show/{predefined-type-name}"})
     public ResponseEntity <?> s3BucketImage(@PathVariable("predefined-type-name") PredefineTypeName predefinedTypeName,
                                             @PathVariable(name = "dummy-seo-name", required = false) String dummySeoName,
                                             @RequestParam(name = "reference") String reference,
                                             HttpServletRequest request) {
-
+        if (!imageUtility.imageValidation(reference)) throw new CustomException("The specified reference is not supported. File should be an image of the supported format png or jp(e)g");
         try {
 
            if(dummySeoName != null)  {
@@ -82,7 +82,7 @@ public class AmazonS3Controller {
     @DeleteMapping("/flush/{predefined-type-name}")
     public void deleteImageInS3Bucket(@PathVariable("predefined-type-name") PredefineTypeName predefinedTypeName,
                                                  @RequestParam(name = "reference") String reference) {
-        try {
+        if (!imageUtility.imageValidation(reference)) throw new CustomException("The specified reference is not supported. File should be an image of the supported format png or jp(e)g");        try {
             s3Service.deleteS3BucketImage(predefinedTypeName.toString(), reference);
             ResponseEntity.ok();
         } catch (AmazonServiceException e) {
@@ -97,8 +97,10 @@ public class AmazonS3Controller {
     @PostMapping("/uploads/{predefined-type-name}")
     public ResponseEntity<String> uploadFile(@PathVariable("predefined-type-name") PredefineTypeName predefinedTypeName,
                                              @RequestParam("file") MultipartFile file) {
+        if (!imageUtility.imageValidation(file.getName())) throw new CustomException("The specified reference is not supported. File should be an image of the supported format png or jp(e)g");
+
         try {
-            return new ResponseEntity<>(s3Service.uploadFileTos3bucket(predefinedTypeName.toString(), s3Utility.convertMultipartFileToFile(file)), HttpStatus.CREATED);
+            return new ResponseEntity<>(s3Service.uploadFileTos3bucket(predefinedTypeName.toString(), imageUtility.convertMultipartToFile(file)), HttpStatus.CREATED);
         } catch(Exception e) {
             throw new CustomException("Something went wrong, could not upload file(s) to the server! Try again later");
         }
