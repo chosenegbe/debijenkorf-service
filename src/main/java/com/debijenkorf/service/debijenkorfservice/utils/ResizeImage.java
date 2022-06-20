@@ -5,6 +5,7 @@ import com.debijenkorf.service.debijenkorfservice.exception.CustomException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.imageio.ImageIO;
@@ -17,11 +18,16 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.lang.String.valueOf;
 
 @Component
 public class ResizeImage {
+
+    @Autowired
+    private ImageUtility imageUtility;
     private static final Logger LOG = LoggerFactory.getLogger(ResizeImage.class);
     private enum Type {
         png, jpg
@@ -41,13 +47,13 @@ public class ResizeImage {
     private static int HEIGHT = 200;
 
     public File resizedImage(File originalFile) {
+        if (!imageUtility.imageValidation(originalFile.getName())) throw new CustomException("The specified format is not supported, image format should be png or jp(e)g");
         String tempDir = System.getProperty("java.io.tmpdir");
         String pathSeparator = FileSystems.getDefault().getSeparator();
         Path ticketTempDirPath = Paths.get(tempDir + pathSeparator + "thumbnail");
         try {
             Path filePath = Files.createDirectories(ticketTempDirPath);
             BufferedImage readImage = ImageIO.read(originalFile);
-
             if (!imageNeedsResizing(originalFile, readImage)) return originalFile;
 
             ScaleType scaleType = ScaleType.getRandomScaleType();
@@ -86,4 +92,6 @@ public class ResizeImage {
         else
             return valueOf(Type.jpg);
     }
+
+
 }
