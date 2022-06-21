@@ -63,7 +63,7 @@ public class AmazonS3ServiceImpl implements AmazonS3Service {
                 return s3FileDownload(normalizedUrl);
             }
             else if (normalizedUrl.contains(original)) {
-                LOG.info("Downloading original File " + fileName + " from s3 bucket! ");
+                LOG.info("Downloading original File " + fileName + " from s3 bucket!");
                 File s3File = s3FileDownload(normalizedUrl);
                 File resizedFile = generateThumbnail.resizedImage(s3File);
                 LOG.info("Original File "+ fileName + " resized!");
@@ -81,10 +81,10 @@ public class AmazonS3ServiceImpl implements AmazonS3Service {
     public String uploadFileTos3bucket(String predefinedTypeName, File file) {
 
         String keyName = predefinedTypeName + pathSeparator + imageUtility.s3KeyName(file.getName());
-        LOG.info("START: Uploading file " + file.getName() + " to s3 bucket. Bucket name - " + bucketName + ", keyName" + keyName);
+        LOG.info("START: Uploading file " + file.getName() + " to s3 bucket. Bucket name - " + bucketName + ", keyName - " + keyName);
         try {
             s3Client.putObject(new PutObjectRequest(bucketName, keyName, file));
-            LOG.info("END: File " + file.getName() + " uploaded to s3 bucket. Bucket name - " + bucketName + ", keyName" + keyName);
+            LOG.info("END: File " + file.getName() + " uploaded to s3 bucket. Bucket name - " + bucketName + ", keyName - " + keyName);
         } catch (AmazonServiceException e) {
             LOG.error(e.getErrorMessage());
         }
