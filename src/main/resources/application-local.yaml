@@ -6,8 +6,8 @@ cloud:
       auto: false
 
 aws:
-  access-key: xxxxxxxxxxxxxxxxxxxxxxx
-  secret-key: xxxxxxxxxxxxxxxxxxxxxxx
+  access-key: AKIAYM57NEE5DPARTL62
+  secret-key: 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
 application:
   bucket:
     name: de-bijenkorf

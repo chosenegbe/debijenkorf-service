@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
+import org.springframework.web.client.RestTemplate;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -51,6 +52,9 @@ public class AmazonS3ServiceImpl implements AmazonS3Service {
     @Autowired
     private ExternalWebDownloadServiceImpl externalWebDownloadService;
 
+    @Autowired
+    private RestTemplate restTemplate;
+
     @Value("${external.server.url}")
     private String externalServerUrl;
 
@@ -72,6 +76,7 @@ public class AmazonS3ServiceImpl implements AmazonS3Service {
             else if (normalizedUrl.isEmpty()) {
                 LOG.info("File not found in s3 bucket, attempting to download from external web server " + externalServerUrl);
                 File fileExternal = externalWebDownloadService.download(fileName);
+                //File filExternal1 = restTemplate.getForObject("http://localhost:9000/external-downloads/" + fileName, File.class);
                 uploadFileTos3bucket(original, fileExternal);
             }
         }
