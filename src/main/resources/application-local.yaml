@@ -1,3 +1,5 @@
+server:
+  port: 9000
 cloud:
   aws:
     region:
@@ -6,13 +8,17 @@ cloud:
       auto: false
 
 aws:
-  access-key: AKIAYM57NEE5DPARTL62
-  secret-key: 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
+  access-key: ENC(CnUdjS0v2OemEiJv9/pgJqJGy/02+mtt4R7z0X6eeO/z/Ss2h4r/HRWv3NxNItUYb2oC7ie3C7VOQ2MgQTiF3Q==)
+  secret-key: ENC(L3EadJLB6CFcabMmtO7pa7thbTr3gsQUbJhZD/zl2eChqJJrg62PFyeJrPVImS5tykAEKr8rpCZvCeNhQokeNJwbITnhN+YxhohL3VPMgsU=)
 application:
   bucket:
     name: de-bijenkorf
-
+jasypt:
+  encryptor:
+    password: password
 spring:
+  application:
+    name: DEBiJENKORF-IMAGE-PROCESSING-SERVICE
   servlet:
     multipart:
       enabled: true

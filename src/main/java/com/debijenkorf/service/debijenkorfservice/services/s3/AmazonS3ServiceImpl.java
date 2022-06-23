@@ -13,6 +13,7 @@ import com.debijenkorf.service.debijenkorfservice.utils.ResizeImage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 
 import org.springframework.stereotype.Service;
@@ -53,7 +54,8 @@ public class AmazonS3ServiceImpl implements AmazonS3Service {
     private ExternalWebDownloadServiceImpl externalWebDownloadService;
 
     @Autowired
-    private RestTemplate restTemplate;
+    @Qualifier("restTemplateExternal")
+    private RestTemplate restTemplateExternal;
 
     @Value("${external.server.url}")
     private String externalServerUrl;
@@ -75,8 +77,8 @@ public class AmazonS3ServiceImpl implements AmazonS3Service {
             }
             else if (normalizedUrl.isEmpty()) {
                 LOG.info("File not found in s3 bucket, attempting to download from external web server " + externalServerUrl);
-                File fileExternal = externalWebDownloadService.download(fileName);
-                //File filExternal1 = restTemplate.getForObject("http://localhost:9000/external-downloads/" + fileName, File.class);
+                //File fileExternal = externalWebDownloadService.download(fileName);
+                File fileExternal = restTemplateExternal.getForObject("http://EXTERNAL-DOWNLOAD-SERVICE/external-downloads/" + fileName, File.class);
                 uploadFileTos3bucket(original, fileExternal);
             }
         }

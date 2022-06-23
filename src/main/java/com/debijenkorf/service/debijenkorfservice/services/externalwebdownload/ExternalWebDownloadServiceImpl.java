@@ -3,6 +3,7 @@ package com.debijenkorf.service.debijenkorfservice.services.externalwebdownload;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -27,8 +28,14 @@ public class ExternalWebDownloadServiceImpl implements ExternalWebDownloadServic
 
     private static final Logger LOG = LoggerFactory.getLogger(ExternalWebDownloadServiceImpl.class);
 
+/*
     @Autowired
     private RestTemplate restTemplate;
+*/
+
+    @Autowired
+    @Qualifier("restTemplateNormal")
+    private RestTemplate restTemplateNormal;
 
     @Value("${external.server.url}")
     private String externalServerUrl;
@@ -45,7 +52,7 @@ public class ExternalWebDownloadServiceImpl implements ExternalWebDownloadServic
 
         LOG.info("Downloading file " + fileName + " from " + externalServerUrl);
 
-        File receivedFile  = restTemplate.execute(urlTemplate, HttpMethod.GET, requestCallback(),
+        File receivedFile  = restTemplateNormal.execute(urlTemplate, HttpMethod.GET, requestCallback(),
                 clientHttpResponse -> {
                     String tempDir = System.getProperty("java.io.tmpdir");
                     String pathSeparator = FileSystems.getDefault().getSeparator();
