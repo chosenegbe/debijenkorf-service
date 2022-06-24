@@ -1,0 +1,33 @@
+server:
+  port: 2000
+
+spring:
+  application:
+    name: API-GATEWAY
+  cloud:
+    gateway:
+      routes:
+        - id: USER-SERVICE
+          uri: lb://USER-SERVICE
+          predicates:
+            - Path=/users/**
+        - id: DEPARTMENT-SERVICE
+          uri: lb://DEPARTMENT-SERVICE
+          predicates:
+            - Path=/departments/**
+        - id: DEBiJENKORF-IMAGE-PROCESSING-SERVICE
+          uri: lb://DEBiJENKORF-IMAGE-PROCESSING-SERVICE
+          predicates:
+            - Path=/image/**
+        - id: EXTERNAL-DOWNLOAD-SERVICE
+          uri: lb://EXTERNAL-DOWNLOAD-SERVICE
+          predicates:
+            - Path=/external-downloads/**
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    hostname: localhost
