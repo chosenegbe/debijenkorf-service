@@ -97,7 +97,8 @@ public class AmazonS3Controller {
     @PostMapping("/uploads/{predefined-type-name}")
     public ResponseEntity<String> uploadFile(@PathVariable("predefined-type-name") PredefineTypeName predefinedTypeName,
                                              @RequestParam("file") MultipartFile file) {
-        if (!imageUtility.imageValidation(file.getName())) throw new CustomException("The specified reference is not supported. File should be an image of the supported format png or jp(e)g");
+
+        if (!imageUtility.imageValidation(file.getOriginalFilename())) throw new CustomException("The specified reference is not supported. File should be an image of the supported format png or jp(e)g");
 
         try {
             return new ResponseEntity<>(s3Service.uploadFileTos3bucket(predefinedTypeName.toString(), imageUtility.convertMultipartToFile(file)), HttpStatus.CREATED);

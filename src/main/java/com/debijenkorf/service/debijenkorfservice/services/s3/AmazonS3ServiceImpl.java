@@ -13,10 +13,12 @@ import com.debijenkorf.service.debijenkorfservice.utils.ResizeImage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 
 import org.springframework.stereotype.Service;
 import org.springframework.util.StreamUtils;
+import org.springframework.web.client.RestTemplate;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
@@ -51,6 +53,10 @@ public class AmazonS3ServiceImpl implements AmazonS3Service {
     @Autowired
     private ExternalWebDownloadServiceImpl externalWebDownloadService;
 
+    @Autowired
+    @Qualifier("restTemplateExternal")
+    private RestTemplate restTemplateExternal;
+
     @Value("${external.server.url}")
     private String externalServerUrl;
 
@@ -63,7 +69,7 @@ public class AmazonS3ServiceImpl implements AmazonS3Service {
                 return s3FileDownload(normalizedUrl);
             }
             else if (normalizedUrl.contains(original)) {
-                LOG.info("Downloading original File " + fileName + " from s3 bucket! ");
+                LOG.info("Downloading original File " + fileName + " from s3 bucket!");
                 File s3File = s3FileDownload(normalizedUrl);
                 File resizedFile = generateThumbnail.resizedImage(s3File);
                 LOG.info("Original File "+ fileName + " resized!");
@@ -71,7 +77,8 @@ public class AmazonS3ServiceImpl implements AmazonS3Service {
             }
             else if (normalizedUrl.isEmpty()) {
                 LOG.info("File not found in s3 bucket, attempting to download from external web server " + externalServerUrl);
-                File fileExternal = externalWebDownloadService.download(fileName);
+                //File fileExternal = externalWebDownloadService.download(fileName);
+                File fileExternal = restTemplateExternal.getForObject("http://EXTERNAL-DOWNLOAD-SERVICE/external-downloads/" + fileName, File.class);
                 uploadFileTos3bucket(original, fileExternal);
             }
         }
@@ -81,10 +88,10 @@ public class AmazonS3ServiceImpl implements AmazonS3Service {
     public String uploadFileTos3bucket(String predefinedTypeName, File file) {
 
         String keyName = predefinedTypeName + pathSeparator + imageUtility.s3KeyName(file.getName());
-        LOG.info("START: Uploading file " + file.getName() + " to s3 bucket. Bucket name - " + bucketName + ", keyName" + keyName);
+        LOG.info("START: Uploading file " + file.getName() + " to s3 bucket. Bucket name - " + bucketName + ", keyName - " + keyName);
         try {
             s3Client.putObject(new PutObjectRequest(bucketName, keyName, file));
-            LOG.info("END: File " + file.getName() + " uploaded to s3 bucket. Bucket name - " + bucketName + ", keyName" + keyName);
+            LOG.info("END: File " + file.getName() + " uploaded to s3 bucket. Bucket name - " + bucketName + ", keyName - " + keyName);
         } catch (AmazonServiceException e) {
             LOG.error(e.getErrorMessage());
         }

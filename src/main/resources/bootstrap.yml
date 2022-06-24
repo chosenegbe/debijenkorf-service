@@ -1,0 +1,5 @@
+spring:
+  cloud:
+    config:
+      enabled: true
+      import: configserver:http://localhost:9095

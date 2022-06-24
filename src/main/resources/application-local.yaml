@@ -1,3 +1,5 @@
+server:
+  port: 9000
 cloud:
   aws:
     region:
@@ -6,22 +8,26 @@ cloud:
       auto: false
 
 aws:
-  access-key: xxxxxxxxxxxxxxxxxxxxxxx
-  secret-key: xxxxxxxxxxxxxxxxxxxxxxx
+  access-key: ENC(CnUdjS0v2OemEiJv9/pgJqJGy/02+mtt4R7z0X6eeO/z/Ss2h4r/HRWv3NxNItUYb2oC7ie3C7VOQ2MgQTiF3Q==)
+  secret-key: ENC(L3EadJLB6CFcabMmtO7pa7thbTr3gsQUbJhZD/zl2eChqJJrg62PFyeJrPVImS5tykAEKr8rpCZvCeNhQokeNJwbITnhN+YxhohL3VPMgsU=)
+
+jasypt:
+  encryptor:
+    password: password
+
 application:
   bucket:
     name: de-bijenkorf
 
 spring:
+  application:
+    name: DEBiJENKORF-IMAGE-PROCESSING-SERVICE
   servlet:
     multipart:
       enabled: true
       file-size-threshold: 10MB
       max-file-size: 15MB
       max-request-size: 20MB
-  jasypt:
-    encryptor:
-      password: salting
 
 external:
   server:
@@ -33,7 +39,7 @@ logging:
     debijenkorf:
       service:
         debijenkorfservice: trace
-    com:
+    com: ###configuration file to prevent noise in the application logs related to Amazon s3, hide com.amazonaws.util.EC2MetadataUtils warning logs on startup.
       amazonaws:
         util:
           EC2MetadataUtils: error
